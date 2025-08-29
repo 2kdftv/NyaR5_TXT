@@ -189,7 +189,7 @@ def get_run_cmd(config: dict, gpu_nums: int):
     --lr_scheduler_type cosine_with_min_lr \
     --lr_scheduler_kwargs "{\\"min_lr_rate\\": {min_lr_rate}}" \
     --tf32 True \
-    --gradient_checkpointing {gradient_checkpointing} \
+    --gradient_checkpointing False \
     --optim {optimizer} \
     --use_liger {use_liger} --num_generations {num_generations} --vllm_mode colocate --vllm_gpu_memory_utilization {vllm_gpu_memory_utilization} \
     --disable_fa {disable_fa}"""
@@ -227,12 +227,12 @@ def get_training_json(train_info: dict) -> dict:
     config = get_grpo_config(param_nums)
     print(f"config: {config}")
     run_config = {
-        "epoch_num": 2,
+        "epoch_num": 10,
         "batch_size": config["batch_size"],
         "learning_rate": config["lr"],
         "min_lr_rate": 0.25,
         "use_liger": get_use_liger(model_architecture),
-        "optimizer": "paged_adamw_8bit",
+        "optimizer": "adamw_torch_fused",
         "use_lora": config.get("use_lora", False),
         "disable_fa": disable_flash_attention(model_architecture, model_name),
         "gpu_nums": config["gpu_count"],
@@ -240,7 +240,7 @@ def get_training_json(train_info: dict) -> dict:
         "request_path": train_info["request_path"],
         "distributed": config.get("distributed", "ddp"),
         "gradient_checkpointing": get_gradient_checkpointing(model_name),
-        "gradient_accumulation_steps": 4,
+        "gradient_accumulation_steps": 2,
         "vllm_gpu_memory_utilization": config.get("vllm_gpu_memory_utilization", 0.4),
         "num_generations": 2,
         "use_vllm": get_use_vllm(model_architecture, model_name),
