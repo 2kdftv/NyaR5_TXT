@@ -153,7 +153,7 @@ def get_run_cmd(config: dict, gpu_nums: int):
     --logging_steps 5 \
     --learning_rate {learning_rate} \
     --weight_decay 0. \
-    --warmup_steps 35 \
+    --warmup_steps 150 \
     --lr_scheduler_type cosine_with_min_lr \
     --lr_scheduler_kwargs "{\\"min_lr_rate\\": {min_lr_rate}}" \
     --tf32 True \
@@ -180,12 +180,12 @@ def get_training_json(train_info: dict) -> dict:
     param_nums = get_model_num_params(model_name, model_path)
     config = get_instruct_config(param_nums)
     run_config = {
-        "epoch_num": 3,
+        "epoch_num": 200,
         "batch_size": config["batch_size"],
         "learning_rate": config["lr"],
         "min_lr_rate": 0.25,
         "use_liger": get_use_liger(model_architecture),
-        "optimizer": "paged_adamw_8bit",
+        "optimizer": "adamw_torch_fused",
         "use_lora": config.get("use_lora", False),
         "disable_fa": disable_flash_attention(model_architecture, model_name),
         "packing": False,
@@ -193,8 +193,8 @@ def get_training_json(train_info: dict) -> dict:
         "output_dir": train_info["output_dir"],
         "request_path": train_info["request_path"],
         "distributed": config.get("distributed", "ddp"),
-        "gradient_checkpointing": "True",
-        "gradient_accumulation_steps": 4
+        "gradient_checkpointing": "False",
+        "gradient_accumulation_steps": 2
     }
     # data_size = get_data_size(train_info["request_path"])
     
