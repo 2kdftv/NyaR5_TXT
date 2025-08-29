@@ -187,12 +187,12 @@ def get_training_json(train_info: dict) -> dict:
     param_nums = get_model_num_params(model_name, model_path)
     config = get_config(param_nums)
     run_config = {
-        "epoch_num": 3,
+        "epoch_num": 200,
         "batch_size": config["batch_size"],
         "learning_rate": config["lr"],
         "min_lr_rate": 0.25,
         "use_liger": get_use_liger(model_architecture),
-        "optimizer": "paged_adamw_8bit",
+        "optimizer": "adamw_torch_fused",
         "use_lora": config.get("use_lora", False),
         "disable_fa": disable_flash_attention(model_architecture, model_name),
         "gpu_nums": config["gpu_count"],
@@ -200,7 +200,7 @@ def get_training_json(train_info: dict) -> dict:
         "request_path": train_info["request_path"],
         "distributed": config.get("distributed", "ddp"),
         "gradient_checkpointing": get_gradient_checkpointing(model_name),
-        "gradient_accumulation_steps": 1
+        "gradient_accumulation_steps": 2
     }
     
     if not config.get("gradient_checkpointing", True):
